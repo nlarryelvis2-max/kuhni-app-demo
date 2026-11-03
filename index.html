@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Превью · каталог производства</title>
+<style>
+:root{
+  --bg:#F6F3EE; --card:#FFFFFF; --ink:#17140F; --mut:#8A8378; --line:#E7E1D6;
+  --acc:#B4552D; --acc-soft:#F4E3DA; --ok:#2E5941; --ok-soft:#E3EDE6; --err:#B3372B; --err-soft:#F6E2DE;
+  --shadow:0 10px 30px rgba(23,20,15,.10), 0 2px 6px rgba(23,20,15,.06);
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:#E9E4DB;
+  background-image:radial-gradient(1200px 700px at 70% -10%, #F2EDE3 0%, #E9E4DB 60%);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  color:var(--ink); display:flex; justify-content:center; align-items:flex-start;
+  min-height:100vh; padding:28px 14px; -webkit-text-size-adjust:100%; text-size-adjust:100%;
+}
+/* ---------- phone frame ---------- */
+.phone{
+  width:100%; max-width:402px; height:min(874px, calc(100vh - 56px)); min-height:640px;
+  background:var(--bg); border-radius:46px; overflow:hidden; position:relative;
+  box-shadow:0 0 0 11px #14120E, 0 0 0 13px #3B382F, 0 34px 80px rgba(0,0,0,.42);
+  display:flex; flex-direction:column;
+}
+@media (max-width:519px){
+  body{padding:0}
+  .phone{max-width:100%; height:100vh; height:100dvh; min-height:100vh; min-height:100dvh; border-radius:0; box-shadow:none}
+  .island{display:none}
+  .statusbar{padding-top:env(safe-area-inset-top)}
+}
+.island{position:absolute; top:12px; left:50%; transform:translateX(-50%); width:118px; height:32px; background:#14120E; border-radius:20px; z-index:60}
+.statusbar{
+  flex:none; height:52px; display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 30px 6px; font:600 14px/1 -apple-system,sans-serif; letter-spacing:.2px; z-index:50;
+}
+.statusbar .icons{display:flex; gap:6px; align-items:center}
+.sb-batt{width:24px;height:12px;border:1.6px solid var(--ink);border-radius:4px;position:relative}
+.sb-batt::after{content:"";position:absolute;inset:1.6px;right:6px;background:var(--ink);border-radius:1.5px}
+.sb-batt::before{content:"";position:absolute;right:-4px;top:3.5px;width:2px;height:5px;background:var(--ink);border-radius:0 2px 2px 0}
+/* ---------- app header ---------- */
+.apphead{
+  flex:none; display:flex; align-items:center; gap:11px; padding:10px 18px 12px;
+}
+.avatar{
+  width:40px;height:40px;border-radius:13px; background:var(--ink); color:#F6F3EE;
+  display:flex;align-items:center;justify-content:center; font:700 15px/1 Georgia,serif; flex:none;
+}
+.apphead .tt{flex:1;min-width:0}
+.apphead .tt b{display:block;font-size:15.5px;letter-spacing:.1px}
+.apphead .tt span{display:block;font-size:11.5px;color:var(--mut);margin-top:2px}
+.gear{
+  width:38px;height:38px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;position:relative;
+}
+.gear svg{width:19px;height:19px;stroke:#5C564B;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.gear .led{position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:var(--err);border:2.5px solid var(--bg)}
+.gear .led.on{background:#3BA55D}
+/* ---------- screens ---------- */
+.screens{flex:1;min-height:0;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;display:none;padding:0 18px 118px}
+.screen.act{display:block}
+/* search */
+.search{
+  position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg) 78%, transparent);
+  padding:4px 0 12px;
+}
+.search input{
+  width:100%; padding:11px 16px 11px 40px; border-radius:14px; border:1.5px solid var(--line);
+  background:var(--card); font-size:16px; color:var(--ink); outline:none;
+}
+.search input::placeholder{color:#A79F92}
+.search input:focus{border-color:var(--ink)}
+.search .sic{position:absolute;left:12px;top:14px;width:17px;height:17px;stroke:#A79F92;fill:none;stroke-width:2;stroke-linecap:round}
+/* category chips */
+.cats{display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.catchip{
+  flex:none; display:flex;align-items:center;gap:7px; padding:9px 14px 9px 10px; border-radius:999px;
+  border:1.5px solid var(--line); background:var(--card); cursor:pointer;
+  font:600 12.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif; color:var(--ink); transition:all .15s;
+}
+.catchip svg{width:19px;height:19px;stroke:var(--ink);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.catchip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.catchip.on svg{stroke:var(--bg)}
+/* product grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prod{
+  background:var(--card); border-radius:var(--r); overflow:hidden; cursor:pointer;
+  border:1.5px solid transparent; transition:all .16s; text-align:left; box-shadow:0 1px 3px rgba(23,20,15,.05);
+}
+.prod:active{transform:scale(.97)}
+.prod .ph{
+  aspect-ratio:1/.86; display:flex;align-items:center;justify-content:center; position:relative;
+}
+.prod .ph svg{width:58%;height:58%;stroke:var(--ink);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.prod .badge{
+  position:absolute; top:9px; left:9px; background:var(--card); border-radius:8px;
+  font:600 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif; padding:5px 8px; color:var(--mut); letter-spacing:.4px; text-transform:uppercase;
+}
+.prod .inf{padding:11px 13px 13px}
+.prod .inf b{display:block;font-size:13.5px;line-height:1.3;letter-spacing:.1px;min-height:35px}
+.prod .price{display:flex;align-items:baseline;gap:5px;margin-top:7px}
+.prod .price b{font-size:15px;min-height:0;letter-spacing:.2px}
+.prod .price span{font-size:11px;color:var(--mut)}
+.prod .lead-t{font-size:11px;color:var(--mut);margin-top:3px}
+.grid-note{grid-column:1/-1;font-size:11.5px;color:var(--mut);text-align:center;padding:10px 20px 4px;line-height:1.5}
+/* ---------- screen: build ---------- */
+.empty{
+  margin-top:16vh; text-align:center; padding:0 30px;
+}
+.empty svg{width:56px;height:56px;stroke:#B9B1A2;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;margin-bottom:16px}
+.empty b{display:block;font-size:16px;margin-bottom:8px}
+.empty p{font-size:13px;color:var(--mut);line-height:1.55;margin-bottom:20px}
+.btn-dark{
+  display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);
+  border:none;border-radius:14px;padding:13px 22px;font:600 13.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;cursor:pointer;
+}
+.bcard{
+  background:var(--card); border-radius:var(--r); padding:16px; display:flex; gap:14px; align-items:center;
+  border:1.5px solid var(--line);
+}
+.bcard .ph{width:88px;height:88px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center}
+.bcard .ph svg{width:60%;height:60%;stroke:var(--ink);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.bcard .nm{font-size:15px;font-weight:700;letter-spacing:.1px}
+.bcard .cat{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.7px;margin:4px 0 8px}
+.bcard .pr{font-size:14px;font-weight:700}
+.bcard .pr span{font-weight:400;font-size:11px;color:var(--mut)}
+.unlink{margin-left:auto;flex:none;width:34px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;color:var(--mut);font-size:16px;line-height:1}
+.sect{font:700 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;letter-spacing:1.3px;text-transform:uppercase;color:var(--mut);margin:22px 0 11px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);
+  background:var(--card);font:500 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;cursor:pointer;color:var(--ink);transition:all .15s;
+}
+.fchip .sw{width:15px;height:15px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.fchip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink);font-weight:650}
+.slider-box{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:16px 18px 13px}
+.slider-box .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.slider-box .top b{font-size:15px}
+.slider-box .top span{font-size:11.5px;color:var(--mut)}
+input[type=range]{width:100%;appearance:none;-webkit-appearance:none;height:4px;border-radius:4px;background:var(--line);outline:none}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;background:var(--card);
+  border:1.5px solid var(--ink);box-shadow:0 2px 8px rgba(23,20,15,.2);cursor:grab;
+}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--card);border:1.5px solid var(--ink);cursor:grab}
+.slider-scale{display:flex;justify-content:space-between;font-size:10.5px;color:#B9B1A2;margin-top:8px}
+.dimset{display:flex;flex-direction:column;gap:11px;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:15px 18px 12px;margin-bottom:3px}
+.dimrow{display:flex;align-items:baseline;gap:8px;margin-bottom:-4px}
+.dimrow .dlab{font:700 10.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;letter-spacing:.9px;text-transform:uppercase;color:var(--mut);flex:1}
+.dimrow b{font-size:15px}
+.dimrow .dcalc{font:650 11px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:var(--acc);text-align:right;max-width:52%}
+input[type=range]:disabled{opacity:.45}
+#feats .fchip{font-size:12px;padding:9px 12px}
+textarea{
+  width:100%;min-height:76px;resize:none;border-radius:14px;border:1.5px solid var(--line);background:var(--card);
+  padding:12px 14px;font:500 16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:var(--ink);outline:none
+}
+textarea:focus{border-color:var(--ink)}
+textarea::placeholder{color:#B7AF9F}
+.totline{display:flex;justify-content:space-between;align-items:baseline;padding:13px 4px 0;font-size:13px;color:var(--mut)}
+.totline b{font-size:19px;color:var(--ink);letter-spacing:.2px}
+.seg{display:flex;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.seg button{
+  flex:1;border:none;background:transparent;border-radius:10px;padding:10px 6px;font:600 12.5px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  color:var(--mut);cursor:pointer;
+}
+.seg button.on{background:var(--ink);color:var(--bg)}
+/* ---------- screen: visual ---------- */
+.dz{
+  border:2px dashed #CDC5B5; border-radius:var(--r); padding:34px 22px; text-align:center; cursor:pointer;
+  background:var(--card); transition:border-color .15s;
+}
+.dz:hover{border-color:var(--ink)}
+.dz svg{width:38px;height:38px;stroke:var(--acc);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:12px}
+.dz b{display:block;font-size:14.5px;margin-bottom:5px}
+.dz p{font-size:12px;color:var(--mut);line-height:1.5}
+.hint{display:flex;gap:10px;margin-top:12px;padding:12px 14px;background:var(--acc-soft);border-radius:14px;font-size:11.5px;line-height:1.5;color:#7A4023}
+.hint svg{width:16px;height:16px;flex:none;stroke:#B4552D;fill:none;stroke-width:1.8;stroke-linecap:round;margin-top:1px}
+.photo-wrap{position:relative;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--line)}
+.photo-wrap img{display:block;width:100%}
+.photo-wrap .chg{
+  position:absolute;right:10px;top:10px;background:rgba(23,20,15,.72);color:#fff;border:none;border-radius:10px;
+  padding:8px 13px;font:600 11.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+/* generate button */
+.bigbtn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:9px;
+  background:var(--acc);color:#fff;border:none;border-radius:16px;padding:16px;
+  font:700 15px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;letter-spacing:.2px;cursor:pointer;transition:transform .12s, opacity .15s;margin-top:14px;
+  box-shadow:0 8px 22px rgba(180,85,45,.32);
+}
+.bigbtn:active{transform:scale(.98)}
+.bigbtn:disabled{opacity:.45;box-shadow:none;cursor:default}
+.bigbtn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+/* loading */
+.loader{
+  background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:22px 18px;text-align:center;
+}
+.wave{display:flex;justify-content:center;gap:6px;margin-bottom:14px}
+.wave i{width:9px;height:9px;border-radius:50%;background:var(--acc);animation:wv 1.2s infinite}
+.wave i:nth-child(2){animation-delay:.15s}.wave i:nth-child(3){animation-delay:.3s}
+@keyframes wv{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-7px);opacity:1}}
+.loader b{display:block;font-size:14px;margin-bottom:5px}
+.loader p{font-size:12px;color:var(--mut)}
+/* error / success */
+.note{border-radius:16px;padding:15px 16px;font-size:13px;line-height:1.55;display:flex;gap:10px}
+.note.err{background:var(--err-soft);color:#8C2A20}
+.note.ok{background:var(--ok-soft);color:#26503B}
+.note svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
+.note button{background:none;border:none;color:inherit;font:650 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;text-decoration:underline;cursor:pointer;padding:0}
+/* before/after */
+.ba{position:relative;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--line);user-select:none;touch-action:none}
+.ba img{display:block;width:100%;pointer-events:none}
+.ba .after{position:absolute;inset:0;clip-path:inset(0 0 0 50%)}
+.ba .after img{height:100%;object-fit:cover}
+.ba .handle{
+  position:absolute;top:0;bottom:0;left:50%;width:3px;background:#fff;box-shadow:0 0 10px rgba(0,0,0,.4);cursor:ew-resize;
+}
+.ba .handle::after{
+  content:"◂ ▸";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:#fff;color:var(--ink);font-size:9px;font-weight:700;padding:7px 8px;border-radius:50%;letter-spacing:1px;
+}
+.ba .tag{position:absolute;top:10px;background:rgba(23,20,15,.72);color:#fff;font:600 10.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;padding:6px 10px;border-radius:8px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.ba .tag.l{left:10px}.ba .tag.r{right:10px}
+/* offer card */
+.offer{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:16px;margin-top:14px}
+.offer .row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;color:var(--mut)}
+.offer .row b{color:var(--ink);font-weight:600;text-align:right}
+.offer .row.total{border-top:1.5px dashed var(--line);margin-top:8px;padding-top:12px;align-items:baseline}
+.offer .row.total b{font-size:19px;font-weight:750}
+.offer .acts{display:flex;gap:9px;margin-top:14px}
+.offer .acts .btn-dark{flex:1;justify-content:center;padding:13px 10px;font-size:13px}
+.btn-ghost{
+  flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--card);
+  border:1.5px solid var(--ink);border-radius:14px;padding:13px 10px;font:600 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:var(--ink);cursor:pointer;
+}
+/* ---------- tabbar ---------- */
+.tabbar{
+  position:absolute;left:0;right:0;bottom:0;z-index:40;
+  background:rgba(246,243,238,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1.5px solid var(--line); display:flex; padding:8px 10px calc(10px + env(safe-area-inset-bottom));
+}
+.tab{
+  flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;
+  font:600 10.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:#A79F92;padding:6px 0 4px;position:relative;border-radius:12px;
+}
+.tab svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{color:var(--ink)}
+.tab .bdg{
+  position:absolute;top:2px;left:calc(50% + 8px);min-width:16px;height:16px;border-radius:9px;background:var(--acc);
+  color:#fff;font:700 9.5px/16px -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;text-align:center;padding:0 4px;display:none;
+}
+.tab .bdg.show{display:block}
+/* ---------- modal ---------- */
+.modal{position:absolute;inset:0;z-index:70;display:none}
+.modal.open{display:block}
+.modal .bg{position:absolute;inset:0;background:rgba(23,20,15,.4)}
+.modal .sheet{
+  position:absolute;left:0;right:0;bottom:0;background:var(--bg);border-radius:26px 26px 0 0;padding:22px 20px calc(24px + env(safe-area-inset-bottom));
+  max-height:82%;overflow-y:auto;
+}
+.sheet h3{font-size:17px;margin-bottom:4px}
+.sheet .sub{font-size:12.5px;color:var(--mut);line-height:1.5;margin-bottom:16px}
+.field{margin-bottom:13px}
+.field label{display:block;font:700 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin-bottom:7px}
+.field input{
+  width:100%;padding:12px 14px;border-radius:13px;border:1.5px solid var(--line);background:var(--card);
+  font:500 16px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink);outline:none;
+}
+.field input:focus{border-color:var(--ink)}
+.field .lnk{font-size:12px;color:var(--acc);margin-top:7px;display:inline-block}
+.sheet .btn-dark{width:100%;justify-content:center}
+/* toast */
+.toast{
+  position:absolute;left:50%;bottom:112px;transform:translateX(-50%) translateY(20px);z-index:80;
+  background:var(--ink);color:var(--bg);border-radius:13px;padding:12px 18px;font:600 12.5px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;max-width:88%;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+::-webkit-scrollbar{width:0;height:0}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span class="icons"><svg width="15" height="11" viewBox="0 0 15 11" fill="#17140F"><rect x="0" y="7" width="2.6" height="4" rx="1"/><rect x="4" y="4.6" width="2.6" height="6.4" rx="1"/><rect x="8" y="2.2" width="2.6" height="8.8" rx="1"/><rect x="12" y="0" width="2.6" height="11" rx="1"/></svg><i class="sb-batt"></i></span></div>
+
+  <div class="apphead">
+    <div class="avatar">М</div>
+    <div class="tt"><b>Мастерская</b><span>каталог · превью в интерьере клиента</span></div>
+    <button class="gear" id="btnSet" title="Настройки API">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.35a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.65a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09c0 .68.4 1.29 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.27.62.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.29.4-1.51 1z"/></svg>
+      <i class="led" id="keyLed"></i>
+    </button>
+  </div>
+
+  <div class="screens">
+
+    <!-- ======= SCREEN: CATALOG ======= -->
+    <section class="screen act" id="sc-cat">
+      <div class="search">
+        <svg class="sic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+        <input id="q" type="search" placeholder="Найти модель — «кухня», «дуб»…">
+      </div>
+      <div class="cats" id="cats"></div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <!-- ======= SCREEN: BUILD ======= -->
+    <section class="screen" id="sc-build">
+      <div class="empty" id="buildEmpty">
+        <svg viewBox="0 0 64 64"><rect x="8" y="26" width="48" height="26" rx="4"/><path d="M8 38h48M24 26v-8h16v8"/><path d="M20 44v8M44 44v8"/></svg>
+        <b>Модель не выбрана</b>
+        <p>Откройте каталог и выберите изделие — параметры и цена подставятся автоматически.</p>
+        <button class="btn-dark" onclick="go('cat')">Открыть каталог</button>
+      </div>
+      <div id="buildBody" style="display:none">
+        <div class="bcard">
+          <div class="ph" id="bPh"></div>
+          <div style="min-width:0">
+            <div class="nm" id="bName"></div>
+            <div class="cat" id="bCat"></div>
+            <div class="pr" id="bPrice"></div>
+          </div>
+          <button class="unlink" onclick="clearSel()" title="Убрать выбор">×</button>
+        </div>
+
+        <div class="sect">Исполнение</div>
+        <div class="chips" id="colors"></div>
+
+        <div class="sect">Габариты изделия · Ш × В × Г</div>
+        <div class="dimset">
+          <div class="dimrow"><span class="dlab">Ширина</span><b id="dimWOut"></b><span class="dcalc" id="dimWCalc"></span></div>
+          <input type="range" id="dimWR" oninput="onDim('w',this.value)">
+          <div class="slider-scale"><span id="dimWMin"></span><span id="dimWMax"></span></div>
+          <div class="dimrow"><span class="dlab">Высота</span><b id="dimHOut"></b></div>
+          <input type="range" id="dimHR" oninput="onDim('h',this.value)">
+          <div class="slider-scale"><span id="dimHMin"></span><span id="dimHMax"></span></div>
+          <div class="dimrow"><span class="dlab">Глубина</span><b id="dimDOut"></b></div>
+          <input type="range" id="dimDR" oninput="onDim('d',this.value)">
+          <div class="slider-scale"><span id="dimDMin"></span><span id="dimDMax"></span></div>
+        </div>
+
+        <div class="sect">Детали конструкции</div>
+        <div class="chips" id="feats"></div>
+
+        <div class="sect">Своими словами</div>
+        <textarea id="freeTxt" rows="3" maxlength="400" placeholder="Например: фартук в цвет столешницы, розетки внутри шкафа, место под холодильник 600 мм…"></textarea>
+
+        <div class="sect">Стена клиента</div>
+        <div class="seg" id="wallSeg">
+          <button class="on" data-w="empty">Пустая стена</button>
+          <button data-w="replace">Заменить старую мебель</button>
+        </div>
+
+        <div class="totline"><span>Срок изготовления</span><b id="leadOut"></b></div>
+      </div>
+    </section>
+
+    <!-- ======= SCREEN: VISUAL ======= -->
+    <section class="screen" id="sc-vis">
+      <div class="empty" id="visEmpty">
+        <svg viewBox="0 0 64 64"><rect x="6" y="10" width="52" height="44" rx="6"/><circle cx="24" cy="26" r="5"/><path d="m10 46 14-13 9 8 8-9 13 12"/></svg>
+        <b>Превью не собрано</b>
+        <p>Выберите модель в каталоге и настройте исполнение — затем сфотографируйте стену клиента.</p>
+        <button class="btn-dark" onclick="go('cat')">Выбрать модель</button>
+      </div>
+
+      <div id="visBody" style="display:none">
+        <div id="visIdle">
+          <div class="dz" id="dz">
+            <svg viewBox="0 0 48 48"><rect x="7" y="9" width="34" height="30" rx="3.5"/><path d="M7 31l9-8 7 6 8-9 10 10"/><circle cx="18" cy="18" r="3.4"/></svg>
+            <b>Фото стены клиента</b>
+            <p>Перетащите снимок или коснитесь,<br>чтобы выбрать из галереи</p>
+          </div>
+          <button class="bigbtn" id="btnCam" style="margin-top:12px">
+            <svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/></svg>
+            Снять на камеру
+          </button>
+          <div class="hint">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 8v4.5M12 16h.01"/></svg>
+            <span>Снимайте фронтально к стене, при дневном свете, без людей в кадре — так превью получается с первого раза.</span>
+          </div>
+        </div>
+
+        <div id="visReady" style="display:none">
+          <div class="photo-wrap">
+            <img id="srcImg" alt="Фото стены клиента">
+            <button class="chg" onclick="pickFile()">Заменить фото</button>
+          </div>
+          <button class="bigbtn" id="btnGen">
+            <svg viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6.5 17.5v3M5 19h3M13 3l2.5 6.5L22 12l-6.5 2.5L13 21l-2.5-6.5L4 12l6.5-2.5z"/></svg>
+            <span id="genLbl">Сгенерировать превью</span>
+          </button>
+        </div>
+
+        <div id="visBusy" style="display:none">
+          <div class="loader">
+            <div class="wave"><i></i><i></i><i></i></div>
+            <b id="busyT">Рисуем мебель на вашей стене…</b>
+            <p id="busyS">Обычно около минуты. Не закрывайте страницу.</p>
+          </div>
+        </div>
+
+        <div id="visErr" style="display:none"></div>
+
+        <div id="visDone" style="display:none">
+          <div class="ba" id="ba">
+            <img id="beforeImg" alt="До">
+            <div class="after" id="afterWrap"><img id="afterImg" alt="После"></div>
+            <div class="handle" id="baHandle"></div>
+            <span class="tag l">фото клиента</span><span class="tag r">превью</span>
+          </div>
+          <div class="offer" id="offer"></div>
+          <div class="acts" style="display:flex;gap:9px;margin-top:12px">
+            <button class="btn-dark" onclick="toast('Заявка на замер сохранена ✓')">Записать на замер</button>
+            <button class="btn-ghost" onclick="downloadPng()">Скачать PNG</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ======= TABBAR ======= -->
+  <nav class="tabbar">
+    <button class="tab on" data-t="cat" onclick="go('cat')">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg>
+      Каталог
+    </button>
+    <button class="tab" data-t="build" onclick="go('build')">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="19" cy="17" r="2.6"/></svg>
+      Сборка<i class="bdg" id="bdgBuild">1</i>
+    </button>
+    <button class="tab" data-t="vis" onclick="go('vis')">
+      <svg viewBox="0 0 24 24"><path d="m5 3 1.7 4.4L11 9 6.7 10.6 5 15l-1.7-4.4L-1 9l4.7-1.6z" transform="translate(3.4 1)"/><path d="M14 13.5l1.1 2.9 2.9 1.1-2.9 1.1-1.1 2.9-1.1-2.9-2.9-1.1 2.9-1.1z"/></svg>
+      Визуал<i class="bdg" id="bdgVis">1</i>
+    </button>
+  </nav>
+
+  <!-- ======= SETTINGS MODAL ======= -->
+  <div class="modal" id="setModal">
+    <div class="bg" onclick="closeSet()"></div>
+    <div class="sheet">
+      <h3>Подключение ИИ</h3>
+      <p class="sub">Ключ нужен только для генерации превью. Хранится в этом браузере, никуда не отправляется кроме Google.</p>
+      <div class="field">
+        <label>API-ключ Google AI Studio</label>
+        <input id="setKey" type="password" placeholder="AIza…" autocomplete="off">
+        <a class="lnk" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Получить ключ — aistudio.google.com →</a>
+      </div>
+      <div class="field">
+        <label>Модель</label>
+        <input id="setModel" type="text" placeholder="gemini-nano-banana-2.1">
+      </div>
+      <button class="btn-dark" onclick="saveSet()">Сохранить</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <input type="file" id="fileIn" accept="image/*" style="display:none">
+</div>
+
+<script>
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+
+/* ================= DATA ================= */
+var CATS = [
+  {k:'',      label:'Всё',    tone:'#EFEAE0', ico:'<path d="M4 6.5h6.5V13H4zM13.5 6.5H20V13h-6.5zM4 16h6.5v6.5H4zM13.5 16H20v6.5h-6.5z"/>'},
+  {k:'kuh',   label:'Кухни',  tone:'#F1E7DA', ico:'<path d="M4 5h16M8 5v3M4 10.5h16v9H4zM12 10.5v4M10 14.5h4"/>'},
+  {k:'div',   label:'Диваны', tone:'#EAE3D2', ico:'<path d="M6 9v3M18 9v3M4 12.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V16H4zM7.5 16v2M16.5 16v2M7.5 10.5V9a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v1.5z"/>'},
+  {k:'shk',   label:'Шкафы',  tone:'#E9E6DE', ico:'<path d="M6.5 4h11v17h-11zM12 4v17M10 11v2.5M14 11v2.5"/>'},
+  {k:'sto',   label:'Столы',  tone:'#F0E9DC', ico:'<path d="M4 9h16M7 9v10M17 9v10M4 19h6M14 19h6"/>'},
+  {k:'stu',   label:'Стулья', tone:'#EFE5DA', ico:'<path d="M8 4v10h8V4M12 14v4.5M8.5 20.5h7"/>'},
+  {k:'van',   label:'Ванная', tone:'#E3E9E4', ico:'<path d="M5 13h14v7H5zM9 13v-2.5a3 3 0 0 1 6 0V13M7.5 7.5v2.5"/>'}
+];
+var ART = {
+  kuh:'<rect x="7" y="8" width="34" height="8" rx="1.5"/><rect x="7" y="19" width="34" height="19" rx="1.5"/><path d="M15 8v8M7 26h34M24 19v5M21.5 24h5"/>',
+  div:'<path d="M12 17v4M36 17v4M9 21a3.5 3.5 0 0 1 3.5-3.5h23A3.5 3.5 0 0 1 39 21v9H9zM16 17.5V15a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v2.5M13 30v4M35 30v4"/>',
+  shk:'<rect x="13" y="6" width="22" height="36" rx="1.5"/><path d="M24 6v36M20.5 21v4M27.5 21v4"/>',
+  sto:'<path d="M7 17h34M12 17v19M36 17v19M7 36h8M33 36h8"/>',
+  stu:'<path d="M17 7v20h14V7M24 27v9M18.5 40h11"/>',
+  van:'<rect x="9" y="24" width="30" height="15" rx="1.5"/><path d="M17 24v-4a7 7 0 0 1 14 0v4M15 12.5v6"/>'
+};
+var CATALOG = [
+  {id:'KUH-001', k:'kuh', name:'Кухня «Прямая Норд»', cat:'Кухни · прямая', w:2400, wmin:1800, wmax:3600,
+   h:2300, hmin:2000, hmax:2600, d:600, dmin:450, dmax:650,
+   price:185000, perM:true, priceNote:'за пог. м базы', lead:21,
+   tokens:'прямая кухня до потолка, матовые фасады без ручек с горизонтальным профилем-рейлингом, цвета белый и графит, кварцевая столешница белая, нижние тумбы и высокие пеналы'},
+  {id:'KUH-002', k:'kuh', name:'Кухня «Угол Сканди»', cat:'Кухни · угловая', w:2800, wmin:2200, wmax:4200,
+   h:2300, hmin:2000, hmax:2600, d:600, dmin:450, dmax:650,
+   price:240000, perM:false, priceNote:'за комплект базы', lead:25,
+   tokens:'угловая кухня, тёплый серый мат, мойка у окна, встроенная техника, фасады без ручек, до потолка'},
+  {id:'KUH-003', k:'kuh', name:'Кухня «Норд Остров»', cat:'Кухни · с островом', w:3400, wmin:3000, wmax:5200,
+   h:2300, hmin:2000, hmax:2600, d:600, dmin:450, dmax:700,
+   price:420000, perM:false, priceNote:'с островом и стойкой', lead:30,
+   tokens:'кухня с островом, остров с барной стойкой и розетками, верхние шкафы до потолка, светлое дерево и белый мат'},
+  {id:'STO-005', k:'sto', name:'Стол «Дуб Монолит»', cat:'Столы · обеденные', w:1800, wmin:1200, wmax:2600,
+   h:750, hmin:750, hmax:750, d:900, dmin:700, dmax:1100,
+   price:85000, perM:false, priceNote:'массив дуба 40 мм', lead:12,
+   tokens:'обеденный стол из массива дуба, толстая столешница 40 мм, характерная торцевая кромка, тёплое натуральное дерево, лаконичные опоры'},
+  {id:'STO-006', k:'sto', name:'Стол «Слэб»', cat:'Столы · журнальные', w:1100, wmin:600, wmax:1600,
+   h:420, hmin:420, hmax:420, d:650, dmin:500, dmax:800,
+   price:39000, perM:false, priceNote:'слэб с живым краем', lead:10,
+   tokens:'журнальный столик, деревянный слэб с живым натуральным краем, чёрное металлическое подстолье, низкий силуэт'},
+  {id:'DIV-002', k:'div', name:'Диван «Вельвет Графит»', cat:'Диваны · прямые', w:2200, wmin:1800, wmax:2800,
+   h:820, hmin:700, hmax:950, d:950, dmin:850, dmax:1050,
+   price:145000, perM:false, priceNote:'ткань на выбор 40+', lead:18,
+   tokens:'прямой диван, велюр графит, деревянные ножки, подушки-спинки, лаконичный силуэт'},
+  {id:'SHK-004', k:'shk', name:'Шкаф-купе «Лофт»', cat:'Шкафы · купе', w:1800, wmin:1200, wmax:3000,
+   h:2500, hmin:2200, hmax:2800, d:600, dmin:400, dmax:650,
+   price:96000, perM:false, priceNote:'за модуль 1800 мм', lead:14,
+   tokens:'шкаф-купе во всю высоту от пола до потолка, две раздвижные двери, бронзовое зеркало и рамки графит, доводчики'},
+  {id:'STU-001', k:'stu', name:'Стул «Дуб Вено»', cat:'Стулья · обеденные', w:450, wmin:450, wmax:450,
+   h:860, hmin:860, hmax:860, d:500, dmin:500, dmax:500,
+   price:12500, perM:false, priceNote:'за штуку', lead:7,
+   tokens:'обеденный стул из массива дуба, гнутая спинка, мягкое сиденье, тёплое натуральное дерево'},
+  {id:'STU-002', k:'stu', name:'Барный стул «Лофт»', cat:'Стулья · барные', w:400, wmin:400, wmax:400,
+   h:1000, hmin:1000, hmax:1000, d:400, dmin:400, dmax:400,
+   price:8900, perM:false, priceNote:'за штуку', lead:7,
+   tokens:'барный стул, чёрный металлический каркас, деревянное сиденье, кольцо-подножка, высокая посадка'},
+  {id:'VAN-001', k:'van', name:'Тумба «Аква 80»', cat:'Ванная · тумбы', w:800, wmin:600, wmax:1200,
+   h:520, hmin:450, hmax:600, d:480, dmin:400, dmax:550,
+   price:68000, perM:false, priceNote:'со столешницей', lead:14,
+   tokens:'подвесная тумба под раковину для ванной, шпон дуба, две дверцы, столешница под встроенную раковину'},
+  {id:'VAN-002', k:'van', name:'Пенал «Аква Хай»', cat:'Ванная · пеналы', w:400, wmin:400, wmax:600,
+   h:2000, hmin:1600, hmax:2200, d:380, dmin:300, dmax:450,
+   price:47000, perM:false, priceNote:'влагостойкое покрытие', lead:14,
+   tokens:'высокий узкий пенал для ванной комнаты, влагостойкие белые фасады, полки до потолка'}
+];
+var COLORS = [
+  {label:'Белый мат',    sw:'#F2F0EA', tok:'белые матовые фасады'},
+  {label:'Графит',       sw:'#4A4A4C', tok:'тёмно-серый графит мат'},
+  {label:'Дуб натур',    sw:'#C89B6C', tok:'шпон дуба натуральный тёплый'},
+  {label:'Венге',        sw:'#3E2F26', tok:'тёмный насыщенный венге'}
+];
+var FEATS = [
+  {k:'glass',   label:'Стеклянные дверцы', tok:'стеклянные дверцы'},
+  {k:'open',    label:'Открытые полки',    tok:'открытые полки без фасадов'},
+  {k:'nodoors', label:'Без дверей',        tok:'композиция без дверей, полностью открытые секции'},
+  {k:'drawers', label:'Ящики',             tok:'выдвижные ящики'},
+  {k:'light',   label:'Подсветка',         tok:'интегрированная LED-подсветка фасадов'},
+  {k:'ceil',    label:'До потолка',        tok:'модули во всю высоту до потолка'},
+  {k:'nohands', label:'Без ручек',         tok:'фасады без ручек, открывание push-to-open'}
+];
+
+/* ================= STATE ================= */
+var S = {
+  cat:'', q:'',
+  sel:null, color:COLORS[0], w:0, h:0, d:0,
+  feat:{}, txt:'',
+  wall:'empty',
+  src:null,        // dataURL фото
+  busy:false, result:null,
+  set:{ key:'', model:'gemini-nano-banana-2.1' }
+};
+try{ var saved = JSON.parse(localStorage.getItem('prev_set')||'null'); if(saved) S.set = saved; }catch(e){}
+
+function fmt(n){ return Math.round(n).toLocaleString('ru-RU'); }
+function catOf(k){ for(var i=0;i<CATS.length;i++) if(CATS[i].k===k) return CATS[i]; return CATS[0]; }
+function art(k){ return '<svg viewBox="0 0 48 48">'+ART[k]+'</svg>'; }
+
+/* ================= TABS ================= */
+function go(t){
+  var map = {cat:'sc-cat', build:'sc-build', vis:'sc-vis'};
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('act'); });
+  $(map[t]).classList.add('act');
+  document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
+  renderBuild(); renderVis();
+}
+
+/* ================= CATALOG ================= */
+function renderCats(){
+  var el = $('cats'); el.innerHTML='';
+  CATS.forEach(function(c){
+    var b = document.createElement('button');
+    b.className = 'catchip'+(S.cat===c.k?' on':'');
+    b.innerHTML = '<svg viewBox="0 0 24 24">'+c.ico+'</svg>'+c.label;
+    b.onclick = function(){ S.cat = c.k; renderCats(); renderGrid(); };
+    el.appendChild(b);
+  });
+}
+function renderGrid(){
+  var g = $('grid'); g.innerHTML='';
+  var q = S.q.trim().toLowerCase();
+  var items = CATALOG.filter(function(m){
+    return (!S.cat || m.k===S.cat) &&
+      (!q || (m.name+' '+m.cat+' '+m.tokens).toLowerCase().indexOf(q)>=0);
+  });
+  if(!items.length){
+    g.innerHTML = '<div class="grid-note">Ничего не нашлось — попробуйте другой запрос.</div>';
+    return;
+  }
+  items.forEach(function(m){
+    var c = catOf(m.k);
+    var b = document.createElement('button');
+    b.className = 'prod';
+    b.innerHTML =
+      '<div class="ph" style="background:'+c.tone+'">'+art(m.k)+
+        '<span class="badge">'+c.label+'</span></div>'+
+      '<div class="inf"><b>'+m.name+'</b>'+
+        '<div class="price"><b>от '+fmt(m.price)+' ₽</b><span>'+m.priceNote+'</span></div>'+
+        '<div class="lead-t">срок ~'+m.lead+' раб. дн.</div>'+
+      '</div>';
+    b.onclick = function(){ pick(m); };
+    g.appendChild(b);
+  });
+  var note = document.createElement('div');
+  note.className='grid-note';
+  note.textContent='Демо-набор. У производства здесь — его реальные модели, цены и сроки.';
+  g.appendChild(note);
+}
+$('q').addEventListener('input', function(){ S.q=this.value; renderGrid(); });
+
+function pick(m){
+  S.sel = m; S.w = m.w; S.h = m.h; S.d = m.d; S.feat = {}; S.txt = '';
+  go('build');
+  toast('В сборке: '+m.name);
+}
+
+/* ================= BUILD ================= */
+function clearSel(){
+  S.sel=null; S.result=null;
+  $('bdgBuild').classList.remove('show');
+  $('bdgVis').classList.remove('show');
+  renderBuild(); renderVis(); go('cat');
+}
+function renderBuild(){
+  var has = !!S.sel;
+  $('buildEmpty').style.display = has?'none':'block';
+  $('buildBody').style.display = has?'block':'none';
+  $('bdgBuild').classList.toggle('show', has);
+  if(!has) return;
+  var m = S.sel, c = catOf(m.k);
+  $('bPh').innerHTML = art(m.k);
+  $('bPh').style.background = c.tone;
+  $('bName').textContent = m.name;
+  $('bCat').textContent = m.cat;
+  $('bPrice').innerHTML = 'от '+fmt(m.price)+' ₽ <span>· '+m.priceNote+'</span>';
+
+  var cw = $('colors'); cw.innerHTML='';
+  COLORS.forEach(function(col){
+    var b=document.createElement('button');
+    b.className='fchip'+(S.color===col?' on':'');
+    b.innerHTML='<i class="sw" style="background:'+col.sw+'"></i>'+col.label;
+    b.onclick=function(){ S.color=col; renderBuild(); };
+    cw.appendChild(b);
+  });
+
+  ['w','h','d'].forEach(function(ax){
+    var r=$('dim'+ax.toUpperCase()+'R');
+    var fixed = m[ax+'min']===m[ax+'max'];
+    r.min=m[ax+'min']; r.max=m[ax+'max']; r.step=fixed?1:50; r.disabled=fixed; r.value=S[ax];
+    $('dim'+ax.toUpperCase()+'Min').textContent=fmt(m[ax+'min'])+' мм';
+    $('dim'+ax.toUpperCase()+'Max').textContent=fmt(m[ax+'max'])+' мм';
+  });
+  onDim('w');
+
+  var fw=$('feats'); fw.innerHTML='';
+  FEATS.forEach(function(f){
+    var b=document.createElement('button');
+    b.className='fchip'+(S.feat[f.k]?' on':'');
+    b.textContent=(S.feat[f.k]?'✓ ':'')+f.label;
+    b.onclick=function(){ S.feat[f.k]=!S.feat[f.k]; renderBuild(); };
+    fw.appendChild(b);
+  });
+  if($('freeTxt').value!==S.txt) $('freeTxt').value=S.txt;
+  $('leadOut').textContent = '~'+m.lead+' раб. дн.';
+}
+function onDim(ax,v){
+  if(v!==undefined) S[ax]=+v;
+  var m=S.sel; if(!m) return;
+  ['w','h','d'].forEach(function(a){
+    $('dim'+a.toUpperCase()+'Out').textContent = fmt(S[a])+' мм';
+  });
+  if(m.perM){
+    var total = m.price * (S.w/1000);
+    $('dimWCalc').textContent = '≈ '+fmt(total)+' ₽ за базу '+(S.w/1000).toFixed(1)+' м';
+  } else if(m.wmin===m.wmax){
+    $('dimWCalc').textContent = 'ширина модели фиксирована';
+  } else {
+    $('dimWCalc').textContent = 'цена не зависит от ширины';
+  }
+}
+$('wallSeg').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  S.wall=b.dataset.w;
+  $('wallSeg').querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b);});
+});
+$('freeTxt').addEventListener('input', function(){ S.txt=this.value; });
+
+/* ================= VISUAL ================= */
+function renderVis(){
+  var has = !!S.sel;
+  $('visEmpty').style.display = has?'none':'block';
+  $('visBody').style.display = has?'block':'none';
+  $('bdgVis').classList.toggle('show', has);
+  if(!has) return;
+  if(S.busy){ show('visBusy'); return; }
+  if(S.result){ show('visDone'); buildOffer(); return; }
+  if(S.src){ show('visReady'); $('srcImg').src=S.src; return; }
+  show('visIdle');
+}
+function show(id){
+  ['visIdle','visReady','visBusy','visErr','visDone'].forEach(function(x){
+    $(x).style.display = x===id?'block':'none';
+  });
+}
+/* file input */
+var fileIn = $('fileIn');
+function pickFile(){ fileIn.click(); }
+$('dz').onclick = pickFile;
+$('btnCam').onclick = pickFile;
+fileIn.onchange = function(){
+  var f=this.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(){ S.src=rd.result; renderVis(); };
+  rd.readAsDataURL(f);
+};
+$('btnGen').onclick = generate;
+
+/* before/after slider */
+(function(){
+  var ba=$('ba'), h=$('baHandle'), drag=false;
+  function mv(x){
+    var r=ba.getBoundingClientRect();
+    var p=Math.min(1,Math.max(0,(x-r.left)/r.width));
+    $('afterWrap').style.clipPath='inset(0 0 0 '+(p*100)+'%)';
+    h.style.left=(p*100)+'%';
+  }
+  h.addEventListener('pointerdown',function(e){drag=true;h.setPointerCapture(e.pointerId);});
+  h.addEventListener('pointermove',function(e){ if(drag) mv(e.clientX); });
+  h.addEventListener('pointerup',function(){drag=false;});
+})();
+
+/* ================= GENERATION ================= */
+function buildPrompt(){
+  var m=S.sel;
+  var wall = S.wall==='replace'
+    ? 'На фото уже стоит старая мебель — полностью убери её и поставь новое изделие на её месте.'
+    : 'Стена на фото пустая — поставь изделие у этой стены.';
+  var feats=[]; FEATS.forEach(function(f){ if(S.feat[f.k]) feats.push(f.tok); });
+  return 'Ты — визуализатор мебельного производства. '+wall+'\n'+
+    'Изделие: '+m.name+'. Габариты: ширина '+S.w+' мм, высота '+S.h+' мм, глубина '+S.d+' мм. Исполнение: '+S.color.tok+'.\n'+
+    (feats.length ? 'Детали конструкции: '+feats.join(', ')+'.\n' : '')+
+    (S.txt.trim() ? 'Дополнительные пожелания: '+S.txt.trim()+'\n' : '')+
+    'Облик модели (обязательно сохранить узнаваемые черты): '+m.tokens+'.\n'+
+    'Сохрани комнату с фото: геометрию, перспективу, освещение, пол, стены, окна. Изделие должно стоять на полу, пропорции реалистичные относительно комнаты. Фотореалистичный результат.';
+}
+function generate(){
+  if(S.busy) return;
+  if(!S.set.key){ openSet(); toast('Сначала вставьте API-ключ'); return; }
+  S.busy=true; show('visBusy');
+  var b64 = S.src.split(',')[1];
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(S.set.model||'gemini-nano-banana-2.1')+':generateContent',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-goog-api-key':S.set.key},
+    body: JSON.stringify({contents:[{role:'user',parts:[
+      {inline_data:{mime_type:'image/jpeg',data:b64}},
+      {text:buildPrompt()}
+    ]}]})
+  })
+  .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+  .then(function(res){
+    S.busy=false;
+    if(!res.ok){ throw new Error((res.j.error&&res.j.error.message)||('HTTP '+(res.j.code||''))); }
+    var cand=(res.j.candidates||[])[0];
+    var block=res.j.promptFeedback&&res.j.promptFeedback.blockReason;
+    if(block){ throw new Error('Запрос заблокирован фильтром: '+block); }
+    var parts=((cand&&cand.content&&cand.content.parts)||[]), img=null;
+    for(var i=0;i<parts.length;i++){ if(parts[i].inlineData&&parts[i].inlineData.data) img=parts[i]; }
+    if(!img){ throw new Error('Модель не вернула изображение — попробуйте ещё раз.'); }
+    S.result='data:image/png;base64,'+img.inlineData.data;
+    renderVis();
+  })
+  .catch(function(e){
+    S.busy=false;
+    show('visErr');
+    $('visErr').innerHTML='<div class="note err"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5V13M12 16.5h.01"/></svg>'+
+      '<span>'+e.message+'<br><button onclick="openSet()">Настройки ключа</button></span></div>';
+  });
+}
+function buildOffer(){
+  var m=S.sel;
+  var total = m.perM ? m.price*(S.w/1000) : m.price;
+  var fl=[]; FEATS.forEach(function(f){ if(S.feat[f.k]) fl.push(f.label); });
+  var featLab = fl.length>3 ? fl.slice(0,3).join(' · ')+' +'+(fl.length-3) : fl.join(' · ');
+  $('beforeImg').src=S.src; $('afterImg').src=S.result;
+  $('offer').innerHTML =
+    '<div class="row"><span>Модель</span><b>'+m.name+'</b></div>'+
+    '<div class="row"><span>Габариты</span><b>'+S.w+'×'+S.h+'×'+S.d+' мм</b></div>'+
+    '<div class="row"><span>Исполнение</span><b>'+S.color.label+'</b></div>'+
+    (featLab ? '<div class="row"><span>Конструктив</span><b>'+featLab+'</b></div>' : '')+
+    '<div class="row"><span>Срок изготовления</span><b>~'+m.lead+' раб. дн.</b></div>'+
+    '<div class="row total"><span>Предварительно</span><b>≈ '+fmt(total)+' ₽</b></div>'+
+    '<div class="row"><span>Следующий шаг</span><b>замер и точное КП</b></div>';
+}
+function downloadPng(){
+  if(!S.result) return;
+  var a=document.createElement('a');
+  a.href=S.result; a.download='превью_'+(S.sel?S.sel.id:'')+'.png';
+  a.click();
+}
+
+/* ================= SETTINGS / TOAST ================= */
+function openSet(){
+  $('setKey').value=S.set.key; $('setModel').value=S.set.model||'';
+  $('setModal').classList.add('open');
+}
+function closeSet(){ $('setModal').classList.remove('open'); }
+$('btnSet').onclick=openSet;
+function saveSet(){
+  S.set={ key:$('setKey').value.trim(), model:($('setModel').value.trim()||'gemini-nano-banana-2.1') };
+  try{ localStorage.setItem('prev_set', JSON.stringify(S.set)); }catch(e){}
+  refreshLed(); closeSet(); toast('Настройки сохранены');
+}
+function refreshLed(){ $('keyLed').classList.toggle('on', !!S.set.key); }
+var toastT;
+function toast(t){
+  var el=$('toast'); el.textContent=t; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(function(){ el.classList.remove('show'); },2200);
+}
+
+/* ================= INIT ================= */
+renderCats(); renderGrid(); renderBuild(); renderVis(); refreshLed();
+</script>
+</body>
+</html>
