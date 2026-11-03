@@ -258,6 +258,12 @@ textarea::placeholder{color:#B7AF9F}
 .roomrow .unit{font-size:11px;color:var(--mut);width:26px;flex:none}
 .roomwarn{display:none;font-size:12px;line-height:1.5;color:#8C2A20;background:var(--err-soft);border-radius:10px;padding:9px 12px}
 .roomwarn.show{display:block}
+.gonext{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:11px 16px;border-radius:12px;border:1.5px solid var(--acc);background:var(--acc-soft);color:var(--acc);font:600 12.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;letter-spacing:.3px;cursor:pointer;transition:transform .1s}
+.gonext:active{transform:scale(.985)}
+.gonext svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.viskit{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;font-size:11.5px;color:var(--ink);line-height:1.55;margin-bottom:14px}
+.viskit .vk-t{font:700 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;letter-spacing:.9px;text-transform:uppercase;color:var(--acc);width:100%}
+.viskit i{font-style:normal;color:var(--acc);font-weight:700}
 /* ---------- profile ---------- */
 #profLed{display:none}
 #profLed.on{display:block;background:#3BA55D}
@@ -405,6 +411,11 @@ textarea::placeholder{color:#B7AF9F}
         </div>
 
         <div class="totline"><span>Срок изготовления</span><b id="leadOut"></b></div>
+
+        <button class="gonext" onclick="go('vis')">
+          Перейти к генерации
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
       </div>
     </section>
 
@@ -418,6 +429,7 @@ textarea::placeholder{color:#B7AF9F}
       </div>
 
       <div id="visBody" style="display:none">
+        <div class="viskit" id="visKit"></div>
         <div id="visIdle">
           <div class="dz" id="dz">
             <svg viewBox="0 0 48 48"><rect x="7" y="9" width="34" height="30" rx="3.5"/><path d="M7 31l9-8 7 6 8-9 10 10"/><circle cx="18" cy="18" r="3.4"/></svg>
@@ -877,10 +889,21 @@ function renderVis(){
   $('visBody').style.display = has?'block':'none';
   $('bdgVis').classList.toggle('show', has);
   if(!has) return;
+  renderKit();
   if(S.busy){ show('visBusy'); return; }
   if(S.result){ show('visDone'); buildOffer(); return; }
   if(S.src){ show('visReady'); $('srcImg').src=S.src; return; }
   show('visIdle');
+}
+function renderKit(){
+  var fl=[]; FEATS.forEach(function(x){ if(S.feat[x.k]) fl.push(x.label.toLowerCase()); });
+  var parts=[S.sel.name, fmt(S.w)+'×'+fmt(S.h)+' мм · '+S.color.label];
+  if(fl.length) parts.push(fl.join(', '));
+  var rl=[];
+  if(S.room.len!=='') rl.push('стена '+fmt(S.room.len)+(S.room.h!==''?'×'+fmt(S.room.h):'')+' мм');
+  if(S.room.area!=='') rl.push(S.room.area+' м²');
+  if(rl.length) parts.push(rl.join(' · '));
+  $('visKit').innerHTML='<span class="vk-t">Собрано — сопрягается с фото</span>'+parts.map(esc).join(' <i>·</i> ');
 }
 function show(id){
   ['visIdle','visReady','visBusy','visErr','visDone'].forEach(function(x){
