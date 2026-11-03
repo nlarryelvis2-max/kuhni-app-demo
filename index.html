@@ -240,6 +240,30 @@ textarea::placeholder{color:#B7AF9F}
   flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--card);
   border:1.5px solid var(--ink);border-radius:14px;padding:13px 10px;font:600 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:var(--ink);cursor:pointer;
 }
+/* ---------- room params ---------- */
+.roomset{display:flex;flex-direction:column;gap:10px;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:15px 18px 13px;margin-top:12px}
+.roomrow{display:flex;align-items:center;gap:8px}
+.roomrow .dlab{font:700 10.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;letter-spacing:.9px;text-transform:uppercase;color:var(--mut);flex:1}
+.roomrow input{width:104px;flex:none;padding:9px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);font:500 16px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right;color:var(--ink);outline:none;-moz-appearance:textfield;appearance:textfield}
+.roomrow input::-webkit-outer-spin-button,.roomrow input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.roomrow input:focus{border-color:var(--ink)}
+.roomrow .unit{font-size:11px;color:var(--mut);width:26px;flex:none}
+.roomwarn{display:none;font-size:12px;line-height:1.5;color:#8C2A20;background:var(--err-soft);border-radius:10px;padding:9px 12px}
+.roomwarn.show{display:block}
+/* ---------- profile ---------- */
+#profLed{display:none}
+#profLed.on{display:block;background:#3BA55D}
+.pstats{display:flex;gap:8px;margin:14px 0 4px}
+.pstat{flex:1;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center}
+.pstat b{display:block;font-size:20px;letter-spacing:.2px}
+.pstat span{font-size:9.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;display:block;margin-top:3px}
+.tlist{margin-top:4px}
+.trow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.trow:last-child{border-bottom:none}
+.trow .tn b{display:block;font-size:13.5px}
+.trow .tn span{font-size:11px;color:var(--mut)}
+.trow .tv{text-align:right;font-size:12px;color:var(--mut);flex:none;line-height:1.5}
+.trow .tv b{color:var(--ink)}
 /* ---------- tabbar ---------- */
 .tabbar{
   position:absolute;left:0;right:0;bottom:0;z-index:40;
@@ -295,6 +319,10 @@ textarea::placeholder{color:#B7AF9F}
   <div class="apphead">
     <div class="avatar">М</div>
     <div class="tt"><b>Мастерская</b><span>каталог · превью в интерьере клиента</span></div>
+    <button class="gear" id="btnProf" title="Профиль менеджера">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.8 20c.5-3.8 3.4-5.8 7.2-5.8s6.7 2 7.2 5.8"/></svg>
+      <i class="led" id="profLed"></i>
+    </button>
     <button class="gear" id="btnSet" title="Настройки API">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.35a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.65a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09c0 .68.4 1.29 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.27.62.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.29.4-1.51 1z"/></svg>
       <i class="led" id="keyLed"></i>
@@ -360,6 +388,14 @@ textarea::placeholder{color:#B7AF9F}
           <button data-w="replace">Заменить старую мебель</button>
         </div>
 
+        <div class="sect">Помещение</div>
+        <div class="roomset">
+          <div class="roomrow"><span class="dlab">Длина стены</span><input id="roomLen" type="number" inputmode="numeric" placeholder="—"><span class="unit">мм</span></div>
+          <div class="roomrow"><span class="dlab">Высота стены</span><input id="roomH" type="number" inputmode="numeric" placeholder="—"><span class="unit">мм</span></div>
+          <div class="roomrow"><span class="dlab">Площадь комнаты</span><input id="roomArea" type="number" inputmode="decimal" step="0.1" placeholder="—"><span class="unit">м²</span></div>
+          <div class="roomwarn" id="roomWarn"></div>
+        </div>
+
         <div class="totline"><span>Срок изготовления</span><b id="leadOut"></b></div>
       </div>
     </section>
@@ -420,7 +456,7 @@ textarea::placeholder{color:#B7AF9F}
           </div>
           <div class="offer" id="offer"></div>
           <div class="acts" style="display:flex;gap:9px;margin-top:12px">
-            <button class="btn-dark" onclick="toast('Заявка на замер сохранена ✓')">Записать на замер</button>
+            <button class="btn-dark" onclick="saveLead()">Записать на замер</button>
             <button class="btn-ghost" onclick="downloadPng()">Скачать PNG</button>
           </div>
         </div>
@@ -461,6 +497,12 @@ textarea::placeholder{color:#B7AF9F}
       </div>
       <button class="btn-dark" onclick="saveSet()">Сохранить</button>
     </div>
+  </div>
+
+  <!-- ======= PROFILE MODAL ======= -->
+  <div class="modal" id="profModal">
+    <div class="bg" onclick="closeProf()"></div>
+    <div class="sheet" id="profSheet"></div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -556,12 +598,122 @@ var S = {
   cat:'', q:'',
   sel:null, color:COLORS[0], w:0, h:0, d:0,
   feat:{}, txt:'',
-  wall:'empty',
+  wall:'empty', room:{len:'',h:'',area:''},
   src:null,        // dataURL фото
   busy:false, result:null,
   set:{ key:'', model:'gemini-nano-banana-2.1' }
 };
 try{ var saved = JSON.parse(localStorage.getItem('prev_set')||'null'); if(saved) S.set = saved; }catch(e){}
+
+/* ================= ACCOUNTS (demo) ================= */
+var LSK={u:'prev_users', me:'prev_me', log:'prev_log'};
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function lsGet(k,d){ try{ var v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } }
+function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function users(){ return lsGet(LSK.u,[]); }
+function saveUsers(u){ lsSet(LSK.u,u); }
+function logAct(act, model){
+  var l=lsGet(LSK.log,[]);
+  l.push({u:S.me?S.me.login:'гость', n:S.me?S.me.name:'Без профиля', act:act, m:model||'', t:Date.now()});
+  lsSet(LSK.log,l);
+}
+function statsFor(login){
+  var l=lsGet(LSK.log,[]), st={gen:0,lead:0,last:0};
+  l.forEach(function(e){ if(e.u===login){ if(e.act==='gen')st.gen++; if(e.act==='lead')st.lead++; if(e.t>st.last)st.last=e.t; } });
+  return st;
+}
+function relTime(t){
+  if(!t) return '—';
+  var d=new Date(t), n=new Date();
+  if(d.toDateString()===n.toDateString()) return 'сегодня '+d.toTimeString().slice(0,5);
+  var y=new Date(n.getTime()-864e5);
+  if(d.toDateString()===y.toDateString()) return 'вчера '+d.toTimeString().slice(0,5);
+  return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2);
+}
+function openProf(){ renderProf(); $('profModal').classList.add('open'); }
+function closeProf(){ $('profModal').classList.remove('open'); }
+$('btnProf').onclick=openProf;
+function logout(){ S.me=null; lsSet(LSK.me,null); refreshProf(); renderProf(); toast('Вы вышли'); }
+function refreshProf(){ $('profLed').classList.toggle('on', !!S.me); }
+function saveLead(){ logAct('lead', S.sel?S.sel.name:''); toast('Заявка на замер сохранена ✓'); }
+function renderProf(){
+  var sh=$('profSheet');
+  if(!S.me){
+    sh.innerHTML =
+      '<h3>Профиль</h3>'+
+      '<p class="sub">Каждый менеджер — под своим аккаунтом. Руководство видит, кто сколько превью сгенерировал и сколько заявок на замер записал.</p>'+
+      '<div class="seg" id="authSeg" style="margin:2px 0 16px">'+
+        '<button class="on" data-v="in">Вход</button><button data-v="reg">Регистрация</button></div>'+
+      '<div id="auIn">'+
+        '<div class="field"><label>Логин</label><input id="auLogin" type="text" placeholder="почта или телефон" autocomplete="off"></div>'+
+        '<div class="field"><label>Пароль</label><input id="auPass" type="password" autocomplete="off"></div>'+
+        '<button class="btn-dark" id="btnDoLogin">Войти</button>'+
+      '</div>'+
+      '<div id="auReg" style="display:none">'+
+        '<div class="field"><label>Имя и фамилия</label><input id="rgName" type="text" placeholder="Иван Петров" autocomplete="off"></div>'+
+        '<div class="field"><label>Логин</label><input id="rgLogin" type="text" placeholder="почта или телефон" autocomplete="off"></div>'+
+        '<div class="field"><label>Пароль</label><input id="rgPass" type="password" autocomplete="off"></div>'+
+        '<div class="field"><label>Роль</label><div class="seg" id="roleSeg"><button class="on" data-r="mgr">Менеджер</button><button data-r="boss">Руководитель</button></div></div>'+
+        '<button class="btn-dark" id="btnDoReg">Создать аккаунт</button>'+
+      '</div>'+
+      '<p class="sub" style="margin-top:14px">Демо: аккаунты живут в этом браузере. В рабочей версии — сервер производства и общая аналитика для руководителя.</p>';
+    $('authSeg').onclick=function(e){
+      var b=e.target.closest('button'); if(!b) return;
+      $('authSeg').querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b);});
+      $('auIn').style.display = b.dataset.v==='in'?'block':'none';
+      $('auReg').style.display = b.dataset.v==='reg'?'block':'none';
+    };
+    var role='mgr';
+    $('roleSeg').onclick=function(e){
+      var b=e.target.closest('button'); if(!b) return;
+      role=b.dataset.r;
+      $('roleSeg').querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b);});
+    };
+    $('btnDoLogin').onclick=function(){
+      var lg=$('auLogin').value.trim(), pw=$('auPass').value;
+      var u=null; users().forEach(function(x){ if(x.login===lg && x.pass===pw) u=x; });
+      if(!u){ toast('Неверный логин или пароль'); return; }
+      S.me=u; lsSet(LSK.me,u); refreshProf(); renderProf(); toast('Здравствуйте, '+u.name.split(' ')[0]+'!');
+    };
+    $('btnDoReg').onclick=function(){
+      var nm=$('rgName').value.trim(), lg=$('rgLogin').value.trim(), pw=$('rgPass').value;
+      if(nm.length<2||lg.length<3||pw.length<4){ toast('Заполните имя, логин и пароль (от 4 символов)'); return; }
+      var dup=false; users().forEach(function(x){ if(x.login===lg) dup=true; });
+      if(dup){ toast('Такой логин уже есть'); return; }
+      var u={name:nm, login:lg, pass:pw, role:role};
+      saveUsers(users().concat([u]));
+      S.me=u; lsSet(LSK.me,u); refreshProf(); renderProf(); toast('Аккаунт создан. Здравствуйте, '+nm.split(' ')[0]+'!');
+    };
+    return;
+  }
+  var st=statsFor(S.me.login);
+  var html =
+    '<h3>'+esc(S.me.name)+'</h3>'+
+    '<p class="sub">'+(S.me.role==='boss'?'руководитель':'менеджер')+' · '+esc(S.me.login)+'</p>'+
+    '<div class="pstats">'+
+      '<div class="pstat"><b>'+st.gen+'</b><span>превью</span></div>'+
+      '<div class="pstat"><b>'+st.lead+'</b><span>заявки на замер</span></div>'+
+      '<div class="pstat"><b>'+(st.last?relTime(st.last):'—')+'</b><span>активность</span></div>'+
+    '</div>';
+  if(S.me.role==='boss'){
+    var l=lsGet(LSK.log,[]), byU={};
+    l.forEach(function(e){ byU[e.u]=byU[e.u]||{n:e.n, gen:0, lead:0, last:0}; if(e.act==='gen')byU[e.u].gen++; if(e.act==='lead')byU[e.u].lead++; if(e.t>byU[e.u].last)byU[e.u].last=e.t; });
+    users().forEach(function(u){ if(!byU[u.login]) byU[u.login]={n:u.name, gen:0, lead:0, last:0}; });
+    var rows=Object.keys(byU).map(function(k){return {k:k, v:byU[k]};})
+      .sort(function(a,b){ return (b.v.last||0)-(a.v.last||0); });
+    html += '<div class="sect" style="margin:16px 0 4px">Активность команды</div><div class="tlist">';
+    rows.forEach(function(r){
+      var ru=null; users().forEach(function(x){ if(x.login===r.k) ru=x; });
+      var role = r.k==='гость' ? 'без профиля' : (ru&&ru.role==='boss'?'руководитель':'менеджер');
+      html += '<div class="trow"><div class="tn"><b>'+esc(r.v.n)+'</b><span>'+role+'</span></div>'+
+        '<div class="tv"><b>'+r.v.gen+'</b> превью · <b>'+r.v.lead+'</b> заявок<br>'+relTime(r.v.last)+'</div></div>';
+    });
+    html += '</div>';
+  }
+  html += '<button class="btn-ghost" onclick="logout()" style="width:100%;margin-top:18px">Выйти из аккаунта</button>';
+  sh.innerHTML=html;
+}
+S.me=lsGet(LSK.me,null);
 
 function fmt(n){ return Math.round(n).toLocaleString('ru-RU'); }
 function catOf(k){ for(var i=0;i<CATS.length;i++) if(CATS[i].k===k) return CATS[i]; return CATS[0]; }
@@ -688,6 +840,7 @@ function onDim(ax,v){
   } else {
     $('dimWCalc').textContent = 'цена не зависит от ширины';
   }
+  checkRoom();
 }
 $('wallSeg').addEventListener('click', function(e){
   var b=e.target.closest('button'); if(!b) return;
@@ -695,6 +848,19 @@ $('wallSeg').addEventListener('click', function(e){
   $('wallSeg').querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b);});
 });
 $('freeTxt').addEventListener('input', function(){ S.txt=this.value; });
+['len','h','area'].forEach(function(k){
+  $('room'+k.charAt(0).toUpperCase()+k.slice(1)).addEventListener('input', function(){
+    var v=this.value.trim(); S.room[k]= v===''?'':+v;
+    checkRoom();
+  });
+});
+function checkRoom(){
+  var w=$('roomWarn');
+  if(S.sel && S.room.len!=='' && S.w>S.room.len){
+    w.textContent='Изделие шире стены на '+fmt(S.w-S.room.len)+' мм — уменьшите ширину или выберите другую стену.';
+    w.classList.add('show');
+  } else w.classList.remove('show');
+}
 
 /* ================= VISUAL ================= */
 function renderVis(){
@@ -747,7 +913,16 @@ function buildPrompt(){
     ? 'На фото уже стоит старая мебель — полностью убери её и поставь новое изделие на её месте.'
     : 'Стена на фото пустая — поставь изделие у этой стены.';
   var feats=[]; FEATS.forEach(function(f){ if(S.feat[f.k]) feats.push(f.tok); });
-  return 'Ты — визуализатор мебельного производства. '+wall+'\n'+
+  var room='';
+  if(S.room.len!==''||S.room.h!==''||S.room.area!==''){
+    var rb=[];
+    if(S.room.len!==''&&S.room.h!=='') rb.push('стена примерно '+S.room.len+'×'+S.room.h+' мм');
+    else if(S.room.len!=='') rb.push('длина стены примерно '+S.room.len+' мм');
+    else if(S.room.h!=='') rb.push('высота стены примерно '+S.room.h+' мм');
+    if(S.room.area!=='') rb.push('площадь комнаты около '+S.room.area+' м²');
+    room='Помещение: '+rb.join(', ')+'. Изделие должно вписаться в стену и комнату, пропорции реалистичные.\n';
+  }
+  return 'Ты — визуализатор мебельного производства. '+wall+'\n'+room+
     'Изделие: '+m.name+'. Габариты: ширина '+S.w+' мм, высота '+S.h+' мм, глубина '+S.d+' мм. Исполнение: '+S.color.tok+'.\n'+
     (feats.length ? 'Детали конструкции: '+feats.join(', ')+'.\n' : '')+
     (S.txt.trim() ? 'Дополнительные пожелания: '+S.txt.trim()+'\n' : '')+
@@ -778,6 +953,7 @@ function generate(){
     for(var i=0;i<parts.length;i++){ if(parts[i].inlineData&&parts[i].inlineData.data) img=parts[i]; }
     if(!img){ throw new Error('Модель не вернула изображение — попробуйте ещё раз.'); }
     S.result='data:image/png;base64,'+img.inlineData.data;
+    logAct('gen', S.sel?S.sel.name:'');
     renderVis();
   })
   .catch(function(e){
@@ -792,13 +968,18 @@ function buildOffer(){
   var total = m.perM ? m.price*(S.w/1000) : m.price;
   var fl=[]; FEATS.forEach(function(f){ if(S.feat[f.k]) fl.push(f.label); });
   var featLab = fl.length>3 ? fl.slice(0,3).join(' · ')+' +'+(fl.length-3) : fl.join(' · ');
+  var roomLab='';
+  if(S.room.len!=='') roomLab=fmt(S.room.len)+(S.room.h!==''?'×'+fmt(S.room.h):'')+' мм';
+  if(S.room.area!=='') roomLab+=(roomLab?' · ':'')+S.room.area+' м²';
   $('beforeImg').src=S.src; $('afterImg').src=S.result;
   $('offer').innerHTML =
     '<div class="row"><span>Модель</span><b>'+m.name+'</b></div>'+
     '<div class="row"><span>Габариты</span><b>'+S.w+'×'+S.h+'×'+S.d+' мм</b></div>'+
+    (roomLab ? '<div class="row"><span>Помещение</span><b>'+roomLab+'</b></div>' : '')+
     '<div class="row"><span>Исполнение</span><b>'+S.color.label+'</b></div>'+
     (featLab ? '<div class="row"><span>Конструктив</span><b>'+featLab+'</b></div>' : '')+
     '<div class="row"><span>Срок изготовления</span><b>~'+m.lead+' раб. дн.</b></div>'+
+    (S.me ? '<div class="row"><span>Менеджер</span><b>'+esc(S.me.name)+'</b></div>' : '')+
     '<div class="row total"><span>Предварительно</span><b>≈ '+fmt(total)+' ₽</b></div>'+
     '<div class="row"><span>Следующий шаг</span><b>замер и точное КП</b></div>';
 }
@@ -829,7 +1010,7 @@ function toast(t){
 }
 
 /* ================= INIT ================= */
-renderCats(); renderGrid(); renderBuild(); renderVis(); refreshLed();
+renderCats(); renderGrid(); renderBuild(); renderVis(); refreshLed(); refreshProf();
 </script>
 </body>
 </html>
